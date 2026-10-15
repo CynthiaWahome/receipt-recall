@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import "./brand-tokens.css";
+
+:root {
+  --background: var(--rr-cream);
+  --foreground: var(--rr-navy);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--rr-teal);
+  --color-primary-foreground: var(--rr-white);
+  --color-muted: var(--rr-muted);
+  --color-muted-foreground: var(--rr-muted);
+  --color-accent: var(--rr-amber);
+  --color-accent-foreground: var(--rr-warning-text);
+  --color-destructive: var(--rr-danger);
+  --color-destructive-foreground: var(--rr-white);
+  --color-card: var(--rr-white);
+  --color-card-foreground: var(--rr-navy);
+  --color-border: var(--rr-mint);
+  --color-input: var(--rr-mint);
+  --color-ring: var(--rr-teal);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--rr-navy);
+    --foreground: var(--rr-cream);
+    --color-card: #1B3A4A;
+    --color-border: #1E4A5A;
+    --color-input: #1E4A5A;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--rr-teal);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--rr-teal);
+  color: var(--rr-white);
+}
