@@ -88,10 +88,6 @@ tests/
 └── ...                     # Vitest & Playwright tests
 ```
 
-## Deployment
-
-Production deployment config (Phase 6) — `Dockerfile`, `compose.yaml`, `Caddyfile` not yet added.
-
 ## License
 
-MIT — see `LICENSE` for details.
+MIT — see [LICENSE](LICENSE) for details.
