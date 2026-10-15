@@ -90,7 +90,7 @@ tests/
 
 ## Deployment
 
-Production deployment config coming in Phase 6: `Dockerfile`, `compose.yaml`, `Caddyfile`.
+Production deployment config (Phase 6) — `Dockerfile`, `compose.yaml`, `Caddyfile` not yet added.
 
 ## License
 
