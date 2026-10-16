@@ -137,14 +137,13 @@ export default function NewReceiptClient() {
             />
           </div>
           <div>
-            <label htmlFor="purchasedOn" className="block text-sm font-medium mb-1">Date (YYYY-MM-DD)</label>
+            <label htmlFor="purchasedOn" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Date</label>
             <input
               id="purchasedOn"
-              type="text"
+              type="date"
               value={purchasedOn}
               onChange={(e) => setPurchasedOn(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              pattern="\\d{4}-\\d{2}-\\d{2}"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900"
               required
             />
           </div>
