@@ -28,10 +28,10 @@ export default function NewReceiptClient() {
     return Math.random().toString(36).slice(2, 10);
   }
 
-  const [store, setStore] = useState("");
-  const [purchasedOn, setPurchasedOn] = useState("");
+  const [purchasedOn, setPurchasedOn] = useState(new Date().toISOString().split('T')[0]);
+  const [store, setStore] = useState("Supermarket");
   const [currency, setCurrency] = useState("KES");
-  const [total, setTotal] = useState("");
+  const [total, setTotal] = useState("0");
   const [items, setItems] = useState<Item[]>(() => [
     { id: randomId(), rawName: "", quantity: "", lineTotal: "", productId: "", brand: "", packSizeBase: "", baseUnit: "each", sourceLineIds: "L1" },
   ]);
@@ -117,133 +117,132 @@ export default function NewReceiptClient() {
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-8">
-      <h1 className="text-3xl font-bold mb-6">New Manual Receipt</h1>
+      <main className="max-w-4xl mx-auto px-6 py-8 bg-white dark:bg-gray-900 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">New Manual Receipt</h1>
 
       {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">{error}</div>}
       {success && <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">Receipt created! Redirecting...</div>}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 opacity-100 visible block">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label htmlFor="store" className="block text-sm font-medium mb-1">Store</label>
+            <label htmlFor="store" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Store</label>
             <input
               id="store"
               type="text"
               value={store}
               onChange={(e) => setStore(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               required
             />
           </div>
           <div>
-            <label htmlFor="purchasedOn" className="block text-sm font-medium mb-1">Date (YYYY-MM-DD)</label>
+            <label htmlFor="purchasedOn" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Date</label>
             <input
               id="purchasedOn"
-              type="text"
+              type="date"
               value={purchasedOn}
               onChange={(e) => setPurchasedOn(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              pattern="\\d{4}-\\d{2}-\\d{2}"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               required
             />
           </div>
           <div>
-            <label htmlFor="currency" className="block text-sm font-medium mb-1">Currency</label>
+            <label htmlFor="currency" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Currency</label>
             <input
               id="currency"
               type="text"
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               maxLength={3}
               required
             />
           </div>
           <div>
-            <label htmlFor="total" className="block text-sm font-medium mb-1">Total (minor units, e.g. 13000 for 130.00)</label>
+            <label htmlFor="total" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Total (minor units, e.g. 13000 for 130.00)</label>
             <input
               id="total"
               type="number"
               value={total}
               onChange={(e) => setTotal(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               min="0"
               required
             />
           </div>
         </div>
 
-        <fieldset className="border border-gray-200 rounded-lg p-4">
-          <legend className="text-lg font-medium mb-4">Items</legend>
+      <fieldset className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700">
+        <legend className="text-lg font-medium mb-4 px-2 text-gray-900 dark:text-white">Items</legend>
           {items.map((item, index) => (
-            <div key={item.id} className="grid gap-3 md:grid-cols-4 mb-4 p-3 bg-gray-50 rounded-lg">
+            <div key={item.id} className="grid gap-3 md:grid-cols-4 mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Item Name</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Item Name</label>
                 <input
                   type="text"
                   value={item.rawName}
                   onChange={(e) => updateItem(index, "rawName", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Quantity</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Quantity</label>
                 <input
                   type="number"
                   step="0.01"
                   value={item.quantity}
                   onChange={(e) => updateItem(index, "quantity", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Line Total (minor)</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Line Total (minor)</label>
                 <input
                   type="number"
                   value={item.lineTotal}
                   onChange={(e) => updateItem(index, "lineTotal", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   min="0"
                   required
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Product ID (UUID)</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Product ID (UUID)</label>
                 <input
                   type="text"
                   value={item.productId}
                   onChange={(e) => updateItem(index, "productId", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Leave blank to auto-create"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Brand</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Brand</label>
                 <input
                   type="text"
                   value={item.brand}
                   onChange={(e) => updateItem(index, "brand", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Pack Size Base</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Pack Size Base</label>
                 <input
                   type="number"
                   step="0.01"
                   value={item.packSizeBase}
                   onChange={(e) => updateItem(index, "packSizeBase", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Base Unit</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Base Unit</label>
                 <select
                   value={item.baseUnit}
                   onChange={(e) => updateItem(index, "baseUnit", e.target.value as "ml" | "g" | "each")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="ml">ml</option>
                   <option value="g">g</option>
@@ -251,12 +250,12 @@ export default function NewReceiptClient() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Source Line IDs (comma-separated)</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Source Line IDs (comma-separated)</label>
                 <input
                   type="text"
                   value={item.sourceLineIds}
                   onChange={(e) => updateItem(index, "sourceLineIds", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -267,35 +266,35 @@ export default function NewReceiptClient() {
               )}
             </div>
           ))}
-          <button type="button" onClick={addItem} className="text-primary hover:underline">
+            <button type="button" onClick={addItem} className="text-primary hover:underline text-sm font-medium">
             + Add Item
           </button>
         </fieldset>
 
-        <fieldset className="border border-gray-200 rounded-lg p-4">
-          <legend className="text-lg font-medium mb-4">Adjustments (discounts, fees, etc.)</legend>
+      <fieldset className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700">
+        <legend className="text-lg font-medium mb-4 px-2 text-gray-900 dark:text-white">Adjustments (discounts, fees, etc.)</legend>
           {adjustments.map((adj, index) => (
             <div key={adj.id} className="flex gap-3 mb-3">
-              <input
-                type="text"
-                value={adj.label}
-                onChange={(e) => updateAdjustment(index, "label", e.target.value)}
-                placeholder="Label (e.g. Loyalty discount)"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <input
-                type="number"
-                value={adj.amount}
-                onChange={(e) => updateAdjustment(index, "amount", e.target.value)}
-                placeholder="Amount (minor, negative for discounts)"
-                className="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+                <input
+                  type="text"
+                  value={adj.label}
+                  onChange={(e) => updateAdjustment(index, "label", e.target.value)}
+                  placeholder="Label (e.g. Loyalty discount)"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+                <input
+                  type="number"
+                  value={adj.amount}
+                  onChange={(e) => updateAdjustment(index, "amount", e.target.value)}
+                  placeholder="Amount (minor, negative for discounts)"
+                  className="w-40 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
               <button type="button" onClick={() => removeAdjustment(index)} className="self-end text-red-600 hover:underline text-sm">
                 Remove
               </button>
             </div>
           ))}
-          <button type="button" onClick={addAdjustment} className="text-primary hover:underline">
+          <button type="button" onClick={addAdjustment} className="text-primary hover:underline text-sm font-medium">
             + Add Adjustment
           </button>
         </fieldset>
