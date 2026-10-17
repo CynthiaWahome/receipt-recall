@@ -25,7 +25,7 @@ interface Receipt {
   store: string;
   purchasedOn: string;
   currency: string;
-  totalMinor: number;
+  total: string; // major units, e.g. "380.00"
   mismatchAcknowledged: boolean;
   items: Item[];
   adjustments: Adjustment[];
@@ -54,7 +54,7 @@ function itemsToForm(items?: DraftItemRaw[]): Item[] {
   return (items ?? []).map((it) => ({
     rawName: it.rawName ?? "",
     quantity: it.quantity == null ? "" : String(it.quantity),
-    lineTotal: it.lineTotal == null ? "" : String(it.lineTotal),
+    lineTotal: it.lineTotal == null ? "" : (it.lineTotal / 100).toFixed(2),
     productId: it.productId ?? "",
     brand: it.brand ?? "",
     packSizeBase: it.packSizeBase == null ? "" : String(it.packSizeBase),
@@ -68,7 +68,7 @@ function itemsToForm(items?: DraftItemRaw[]): Item[] {
 function adjustmentsToForm(adjustments?: DraftAdjustmentRaw[]): Adjustment[] {
   return (adjustments ?? []).map((a) => ({
     label: a.label ?? "",
-    amount: a.amount == null ? "" : String(a.amount),
+    amount: a.amount == null ? "" : (a.amount / 100).toFixed(2),
   }));
 }
 
@@ -98,7 +98,7 @@ export default function ReviewReceiptClient() {
           store: data.store || data.draft?.store || "",
           purchasedOn: data.purchasedOn || data.draft?.purchasedOn || "",
           currency: data.currency || data.draft?.currency || "KES",
-          totalMinor: data.totalMinor ?? data.draft?.total ?? 0,
+          total: ((data.totalMinor ?? data.draft?.total ?? 0) / 100).toFixed(2),
           mismatchAcknowledged: data.mismatchAcknowledged,
           items: itemsToForm(data.draft?.items),
           adjustments: adjustmentsToForm(data.draft?.adjustments),
@@ -116,11 +116,15 @@ export default function ReviewReceiptClient() {
     return `${minor < 0 ? "-" : ""}${whole}.${fraction}`;
   }
 
-  // Money fields in this form are already in minor units (13000 = 130.00),
-  // and may be negative for discounts.
+  // Money fields in this form are human-friendly major units ("130.00"),
+  // possibly negative for discounts. Parse to integer minor units for the API.
   function parseMinor(text: string): number {
-    const n = parseInt(String(text).replaceAll(",", ""), 10);
-    return Number.isFinite(n) ? n : 0;
+    const cleaned = String(text).trim().replaceAll(",", "");
+    const sign = cleaned.startsWith("-") ? -1 : 1;
+    const unsigned = cleaned.replace(/^[-+]/, "");
+    if (!/^\d+(\.\d{1,2})?$/.test(unsigned)) return 0;
+    const [whole, fraction = ""] = unsigned.split(".");
+    return sign * (Number(whole) * 100 + Number(fraction.padEnd(2, "0")));
   }
 
   function handleItemChange(index: number, field: keyof Item, value: string) {
@@ -180,7 +184,7 @@ export default function ReviewReceiptClient() {
               store: data.draft?.store || prev.store,
               purchasedOn: data.draft?.purchasedOn || prev.purchasedOn,
               currency: data.draft?.currency || prev.currency,
-              totalMinor: data.draft?.total ?? prev.totalMinor,
+              total: data.draft?.total != null ? (data.draft.total / 100).toFixed(2) : prev.total,
               items: itemsToForm(data.draft?.items),
               adjustments: adjustmentsToForm(data.draft?.adjustments),
             }
@@ -202,7 +206,7 @@ export default function ReviewReceiptClient() {
       store: receipt.store,
       purchasedOn: receipt.purchasedOn,
       currency: receipt.currency,
-      total: receipt.totalMinor,
+      total: parseMinor(receipt.total),
       items: receipt.items.map((item) => ({
         rawName: item.rawName,
         quantity: parseFloat(item.quantity),
@@ -253,7 +257,8 @@ export default function ReviewReceiptClient() {
 
   const calculatedMinor = receipt.items.reduce((sum, i) => sum + parseMinor(i.lineTotal), 0) +
     receipt.adjustments.reduce((sum, a) => sum + parseMinor(a.amount), 0);
-  const differenceMinor = receipt.totalMinor - calculatedMinor;
+  const totalMinor = parseMinor(receipt.total);
+  const differenceMinor = totalMinor - calculatedMinor;
 
   return (
     <main className="max-w-4xl mx-auto px-6 py-8">
@@ -273,7 +278,7 @@ export default function ReviewReceiptClient() {
       {mismatch && (
         <div className="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg">
           <p className="font-medium">Reconciliation mismatch detected!</p>
-          <p>Receipt total: {formatMinor(receipt.totalMinor)}</p>
+          <p>Receipt total: {formatMinor(totalMinor)}</p>
           <p>Calculated total: {formatMinor(calculatedMinor)}</p>
           <p>Difference: {formatMinor(differenceMinor)}</p>
           <label className="flex items-center gap-2 mt-3">
@@ -336,13 +341,14 @@ export default function ReviewReceiptClient() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Total (minor units)</label>
+              <label className="block text-sm font-medium mb-1">Total ({receipt.currency})</label>
               <input
-                type="number"
-                value={receipt.totalMinor}
-                onChange={(e) => setReceipt({ ...receipt!, totalMinor: parseInt(e.target.value, 10) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                value={receipt.total}
+                onChange={(e) => setReceipt({ ...receipt!, total: e.target.value })}
+                placeholder="0.00"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
               />
             </div>
           </div>
@@ -364,7 +370,7 @@ export default function ReviewReceiptClient() {
               </div>
               <div className="md:col-span-3">
                 <span className="text-sm text-gray-600">Receipt total:</span>
-                <div className="font-mono text-lg">{formatMinor(receipt.totalMinor)}</div>
+                <div className="font-mono text-lg">{formatMinor(totalMinor)}</div>
               </div>
               <div className="md:col-span-3">
                 <span className="text-sm text-gray-600">Difference:</span>
@@ -399,20 +405,13 @@ export default function ReviewReceiptClient() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Line Total (minor)</label>
+                  <label className="block text-sm font-medium mb-1">Line total ({receipt.currency})</label>
                   <input
                     type="text"
+                    inputMode="decimal"
                     value={item.lineTotal}
                     onChange={(e) => handleItemChange(index, "lineTotal", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Product ID</label>
-                  <input
-                    type="text"
-                    value={item.productId}
-                    onChange={(e) => handleItemChange(index, "productId", e.target.value)}
+                    placeholder="0.00"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
                   />
                 </div>
@@ -426,17 +425,18 @@ export default function ReviewReceiptClient() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Pack Size Base</label>
+                  <label className="block text-sm font-medium mb-1">Pack size</label>
                   <input
                     type="number"
                     step="0.01"
                     value={item.packSizeBase}
                     onChange={(e) => handleItemChange(index, "packSizeBase", e.target.value)}
+                    placeholder="e.g. 1000"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Base Unit</label>
+                  <label className="block text-sm font-medium mb-1">Unit</label>
                   <select
                     value={item.baseUnit}
                     onChange={(e) => handleItemChange(index, "baseUnit", e.target.value as "ml" | "g" | "each")}
@@ -446,15 +446,6 @@ export default function ReviewReceiptClient() {
                     <option value="g">g</option>
                     <option value="each">each</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Source Line IDs</label>
-                  <input
-                    type="text"
-                    value={item.sourceLineIds}
-                    onChange={(e) => handleItemChange(index, "sourceLineIds", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
-                  />
                 </div>
               </div>
             ))}
@@ -475,7 +466,8 @@ export default function ReviewReceiptClient() {
                   type="text"
                   value={adj.amount}
                   onChange={(e) => handleAdjustmentChange(index, "amount", e.target.value)}
-                  placeholder="Amount (minor, negative for discounts)"
+                  inputMode="decimal"
+                  placeholder="− for discounts, e.g. -20.00"
                   className="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
                 />
                 <button type="button" onClick={() => removeAdjustment(index)} className="self-end text-red-600 hover:underline text-sm">
