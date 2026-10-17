@@ -26,32 +26,20 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* The UI is built on a light surface (white cards, dark ink). Pin the light
-   scheme so OS dark mode can't flip text to light and make it unreadable on
-   those cards. A proper dark theme can come later as its own change. */
-:root {
-  color-scheme: light;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--rr-navy);
+    --foreground: var(--rr-cream);
+    --color-card: #1B3A4A;
+    --color-border: #1E4A5A;
+    --color-input: #1E4A5A;
+  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-}
-
-/* Form controls must always be legible: dark ink on a white field, regardless
-   of what a component's wrapper does. */
-input,
-select,
-textarea {
-  background-color: var(--rr-white);
-  color: var(--rr-navy);
-  border-color: var(--rr-mint);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--rr-muted);
 }
 
 :focus-visible {
