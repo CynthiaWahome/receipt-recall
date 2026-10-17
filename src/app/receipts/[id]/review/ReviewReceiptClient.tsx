@@ -248,11 +248,8 @@ export default function ReviewReceiptClient() {
             <span className="text-sm text-gray-600">Line items total:</span>
             <div className="font-mono text-lg">{formatMinor(receipt.items.reduce((s, i) => s + parseMinor(i.lineTotal), 0))}</div>
           </div>
-          <div>
-            <span className="text-sm text-gray-600">Adjustments:</span>
-            <div className="font-mono text-lg">{formatMinor(receipt.adjustments.reduce((s, a) => s + parseMinor(a.amount), 0))}</div>
-          </div>
-          <div>
+        
+<div>
             <span className="text-sm text-gray-600">Calculated:</span>
             <div className="font-mono text-lg">{formatMinor(calculatedMinor)}</div>
           </div>
