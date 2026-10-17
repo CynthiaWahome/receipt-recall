@@ -1,9 +1,14 @@
 import { z } from "zod";
 
+// DRAFT schemas are deliberately permissive: this is the AI's first pass for
+// human review, so a single odd field (a 0 quantity, a negative line, a decimal
+// price) must not throw the whole extraction away. Amounts here are decimal
+// major units as printed on the receipt (130.00); extract.ts converts them to
+// integer minor units before storing. Strictness lives in the confirm schemas.
 export const draftItemSchema = z.object({
   rawName: z.string().min(1),
-  quantity: z.number().positive().nullable(),
-  lineTotal: z.number().int().nonnegative(),
+  quantity: z.number().nullable(),
+  lineTotal: z.number(),
   productId: z.string().uuid().nullable(),
   brand: z.string().nullable(),
   packSizeBase: z.number().positive().nullable(),
@@ -15,11 +20,11 @@ export const draftSchema = z.object({
   store: z.string().nullable(),
   purchasedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
   currency: z.string().length(3).default("KES"),
-  total: z.number().int().nonnegative(),
+  total: z.number(),
   items: z.array(draftItemSchema).min(1),
   adjustments: z.array(z.object({
     label: z.string().min(1),
-    amount: z.number().int(),
+    amount: z.number(),
   })).default([]),
 });
 
